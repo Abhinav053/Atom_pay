@@ -1,0 +1,18 @@
+{
+  "name": "atompay",
+  "version": "1.0.0",
+  "description": "Node.js workspace for AtomPay.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "check": "node --check index.js",
+    "test": "npm run check"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "mongoose": "^6.2.4"
+  }
+}
