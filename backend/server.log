@@ -1,4 +1,10 @@
-◇ injected env (9) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+
+> atompay@1.0.0 start
+> node index.js
+
+◇ injected env (9) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
 hi
 DB connected successfully
-server connected to 3000
+Server is listening on port http://localhost:5000
+Redis connected ✅

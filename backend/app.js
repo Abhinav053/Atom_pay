@@ -1,10 +1,10 @@
-require('dotenv').confing();
+require('dotenv').config();
 const express=require("express");
 const cors=require("cors")
 const authRouter = require("./routes/auth.routes");
-const transactionRouter = require("./routes/transection.routes");
-const walletRouter = require("./routes/wallet.routes");
-const agentRouter = require("./routes/agent.routes");
+//const transactionRouter = require("./routes/transection.routes");
+//const walletRouter = require("./routes/wallet.routes");
+//const agentRouter = require("./routes/agent.routes");
 
 const app=express();
 app.set("trust proxy",1);
@@ -29,6 +29,13 @@ app.use((req, res, next) => {
     next();
 });
 
+app.get("/", (req, res) => {
+    res.status(200).json({
+        msg: "AtomPay backend is running",
+        api: "/api"
+    });
+});
+
 app.get("/api",(req,res)=>{
     res.status(200).json({
         msg:"working properly",
@@ -50,8 +57,15 @@ app.use((req, res, next) => {
 
 
 app.use("/api/auth", authRouter);
-app.use("/api/wallet", walletRouter);
-app.use("/api/transaction", transactionRouter);
-app.use("/api/agent", agentRouter);
+//app.use("/api/wallet", walletRouter);
+//app.use("/api/transaction", transactionRouter);
+//app.use("/api/agent", agentRouter);
+
+app.use((err, req, res, next) => {
+    console.error(err);
+    res.status(err.status || 500).json({
+        msg: err.message || "Internal server error"
+    });
+});
 
 module.exports = app;
