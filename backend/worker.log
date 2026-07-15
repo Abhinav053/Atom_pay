@@ -1,0 +1,9 @@
+
+> atompay@1.0.0 start:worker
+> node worker.js
+
+◇ injected env (9) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+hi
+DB connected successfully
+Workers running: email, audit
+email job done: 1

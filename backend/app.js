@@ -2,8 +2,8 @@ require('dotenv').config();
 const express=require("express");
 const cors=require("cors")
 const authRouter = require("./routes/auth.routes");
-//const transactionRouter = require("./routes/transection.routes");
-//const walletRouter = require("./routes/wallet.routes");
+const transactionRouter = require("./routes/transection.routes");
+const walletRouter = require("./routes/wallet.routes");
 //const agentRouter = require("./routes/agent.routes");
 
 const app=express();
@@ -57,8 +57,8 @@ app.use((req, res, next) => {
 
 
 app.use("/api/auth", authRouter);
-//app.use("/api/wallet", walletRouter);
-//app.use("/api/transaction", transactionRouter);
+app.use("/api/wallet", walletRouter);
+app.use("/api/transaction", transactionRouter);
 //app.use("/api/agent", agentRouter);
 
 app.use((err, req, res, next) => {

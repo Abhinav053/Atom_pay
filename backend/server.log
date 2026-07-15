@@ -2,8 +2,8 @@
 > atompay@1.0.0 start
 > node index.js
 
-◇ injected env (9) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
-◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+◇ injected env (9) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
 hi
 DB connected successfully
 Server is listening on port http://localhost:5000
