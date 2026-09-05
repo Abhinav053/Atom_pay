@@ -1,0 +1,437 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+/* ═══════════════════════════════════════════════════════
+   AtomPay — Premium Light "Warm Glass" Design System
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Surfaces (warm cream / white glass) ── */
+  --bg: #FEFCF9;
+  --bg-2: #FFF9F3;
+  --bg-3: #FFF3E8;
+  --bg-4: #FFE8D4;
+  --surface: rgba(255, 255, 255, 0.72);    /* frosted glass over cream */
+  --surface-2: rgba(255, 255, 255, 0.88);
+  --surface-3: rgba(255, 255, 255, 0.96);  /* near-solid panels / modals */
+  --border: rgba(0, 0, 0, 0.06);
+  --border-2: rgba(0, 0, 0, 0.10);
+  --track: rgba(0, 0, 0, 0.06);            /* progress / bar tracks */
+
+  /* ── Accents (kept for semantic warmth; gold is the star) ── */
+  --accent: #FF6B35;
+  --accent-2: #F59E0B;
+  --accent-3: #FF4D2E;
+  --accent-soft: rgba(255, 107, 53, 0.12);
+  --accent-glow: rgba(255, 107, 53, 0.28);
+  --grad: linear-gradient(135deg, #FF6B35 0%, #F59E0B 100%);
+  --grad-soft: linear-gradient(135deg, rgba(255, 107, 53, 0.12), rgba(245, 158, 11, 0.08));
+
+  /* ── Royal gold (designs & engraved accents — never body text) ── */
+  --gold: #C9A227;            /* classic gold for lines / frames */
+  --gold-2: #8A6D14;          /* deep engraved gold (readable accent text on cream) */
+  --gold-3: #9A7B1A;          /* shadow gold */
+  --gold-soft: rgba(201, 162, 39, 0.12);
+  --gold-line: rgba(201, 162, 39, 0.32);
+  --gold-glow: rgba(201, 162, 39, 0.35);
+  /* Polished-metal gold gradient (for ornaments, frames, crests, buttons) */
+  --gold-grad: linear-gradient(135deg, #9A7B1A 0%, #E8C45A 28%, #FFF4C2 50%, #E8C45A 72%, #9A7B1A 100%);
+  --gold-grad-soft: linear-gradient(135deg, rgba(201, 162, 39, 0.16), rgba(232, 196, 90, 0.06));
+  --shadow-gold: 0 8px 28px rgba(201, 162, 39, 0.18), 0 2px 8px rgba(0, 0, 0, 0.06);
+
+  /* ── Text (carbon black, sharp) ── */
+  --text: #16161A;            /* carbon black */
+  --text-2: #5B5F66;          /* muted slate */
+  --text-3: #9AA0A6;          /* faint */
+
+  /* ── Semantic ── */
+  --green: #10B981;
+  --red: #EF4444;
+  --green-dim: rgba(16, 185, 129, 0.10);
+  --red-dim: rgba(239, 68, 68, 0.08);
+
+  --radius: 18px;
+  --radius-sm: 12px;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 8px 32px rgba(201, 162, 39, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-glow: 0 8px 40px rgba(201, 162, 39, 0.18);
+
+  /* ── Back-compat aliases ── */
+  --orange: var(--accent);
+  --orange-light: var(--accent-2);
+  --orange-dim: var(--accent-soft);
+  --orange-glow: var(--accent-glow);
+  --bg2: var(--bg-2);
+  --bg3: var(--bg-3);
+  --bg4: var(--bg-4);
+  --text2: var(--text-2);
+  --text3: var(--text-3);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background:
+    radial-gradient(1100px circle at 50% -12%, rgba(255, 107, 53, 0.10), transparent 55%),
+    radial-gradient(900px circle at 100% 0%, rgba(201, 162, 39, 0.10), transparent 50%),
+    radial-gradient(800px circle at 0% 100%, rgba(255, 107, 53, 0.07), transparent 50%),
+    var(--bg);
+  background-attachment: fixed;
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* A single grand lotus crest, low in the hall — clean, not a busy tile */
+body::after {
+  content: '';
+  position: fixed;
+  left: 50%;
+  bottom: -36px;
+  width: 520px;
+  height: 300px;
+  transform: translateX(-50%);
+  z-index: -1;
+  pointer-events: none;
+  background: url('/royal-lotus.svg') center / contain no-repeat;
+  opacity: 0.14;
+}
+
+h1, h2, h3, h4, .display {
+  font-family: 'Syne', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* ── Inputs ── */
+input,
+textarea {
+  font-family: 'DM Sans', sans-serif;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+}
+
+input:focus,
+textarea:focus {
+  border-color: var(--gold);
+  background: #fff;
+  box-shadow: 0 0 0 4px var(--gold-soft);
+}
+
+input::placeholder,
+textarea::placeholder { color: var(--text-3); }
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.input-group label {
+  font-size: 13px;
+  color: var(--text-2);
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   AtomLoader — Regal Gold Atom
+   A molten-gold nucleus circled by a rotating gold aura
+   (royal chakra), with three 3D-tilted orbits whose gold
+   electrons trail comet glows.
+   ═══════════════════════════════════════════════════════ */
+
+.atom-loader {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.atom {
+  position: relative;
+  width: var(--atom-size, 64px);
+  height: var(--atom-size, 64px);
+  perspective: 600px;
+}
+
+/* Royal aura — a slow rotating gold sunburst behind the atom */
+.atom-aura {
+  position: absolute;
+  inset: -14%;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    var(--gold-glow) 24deg,
+    transparent 60deg,
+    transparent 120deg,
+    var(--gold-glow) 144deg,
+    transparent 180deg,
+    transparent 240deg,
+    var(--gold-glow) 264deg,
+    transparent 300deg
+  );
+  filter: blur(6px);
+  opacity: 0.55;
+  animation: aura-spin 9s linear infinite;
+  z-index: 0;
+}
+
+@keyframes aura-spin { to { transform: rotate(360deg); } }
+
+.atom-nucleus {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 22%;
+  height: 22%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #FFFBEA 0%, var(--gold-2) 45%, var(--gold) 100%);
+  box-shadow:
+    0 0 12px var(--gold-2),
+    0 0 24px var(--gold-glow),
+    0 0 48px rgba(201, 162, 39, 0.20);
+  animation: nucleus-pulse 2.2s ease-in-out infinite;
+  z-index: 3;
+}
+
+/* Three concentric circular orbits — each tilted in 3D */
+.ring {
+  position: absolute;
+  border: 1.5px solid rgba(201, 162, 39, 0.30);
+  border-radius: 50%;
+}
+
+.ring-outer {
+  inset: 0;
+  transform: rotateX(70deg) rotateZ(0deg);
+}
+.ring-middle {
+  inset: 10%;
+  transform: rotateX(70deg) rotateZ(60deg);
+}
+.ring-inner {
+  inset: 22%;
+  transform: rotateX(70deg) rotateZ(120deg);
+}
+
+/* The wrapper spins inside the tilted ring plane */
+.e-wrap {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+
+.ring-outer .e-wrap { animation: ring-spin 3.0s linear infinite; }
+.ring-middle .e-wrap { animation: ring-spin 2.2s linear infinite reverse; }
+.ring-inner .e-wrap { animation: ring-spin 1.6s linear infinite; }
+
+@keyframes ring-spin { to { transform: rotate(360deg); } }
+
+.electron {
+  position: absolute;
+  top: calc(var(--atom-size, 64px) * -0.065);
+  left: 50%;
+  width: calc(var(--atom-size, 64px) * 0.12);
+  height: calc(var(--atom-size, 64px) * 0.12);
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #FFFBEA, var(--gold-2));
+  box-shadow:
+    0 0 6px var(--gold-2),
+    0 0 14px var(--gold-glow),
+    0 0 28px rgba(201, 162, 39, 0.25);
+  z-index: 2;
+}
+
+/* Comet trail — a fading gold glow that follows the electron */
+.electron::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200%;
+  height: 100%;
+  transform: translate(-50%, -50%) rotate(90deg);
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(232, 196, 90, 0.35) 30%,
+    rgba(201, 162, 39, 0.12) 70%,
+    transparent 100%
+  );
+  border-radius: 50%;
+  filter: blur(3px);
+}
+
+@keyframes nucleus-pulse {
+  0%, 100% {
+    box-shadow: 0 0 10px var(--gold-2), 0 0 20px var(--gold-glow), 0 0 40px rgba(201, 162, 39, 0.15);
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    box-shadow: 0 0 16px var(--gold-2), 0 0 34px var(--gold-glow), 0 0 60px rgba(201, 162, 39, 0.28);
+    transform: translate(-50%, -50%) scale(1.12);
+  }
+}
+
+/* Royal variant — grander aura + ornamental crown sweep */
+.atom-loader.royal .atom-aura {
+  inset: -22%;
+  opacity: 0.75;
+  animation-duration: 7s;
+}
+.atom-loader.royal .atom::before {
+  content: '';
+  position: absolute;
+  inset: -32%;
+  border-radius: 50%;
+  border: 1.5px solid transparent;
+  background: var(--gold-grad) border-box;
+  -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.55;
+  animation: aura-spin 12s linear infinite reverse;
+}
+
+.atom-loader-label {
+  font-size: 13px;
+  color: var(--text-2);
+  letter-spacing: 0.3px;
+  font-weight: 500;
+}
+
+/* Respect reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .e-wrap,
+  .atom-aura,
+  .atom-loader.royal .atom::before { animation: none; }
+  .atom-nucleus { animation: none; }
+}
+
+/* ── Small inline spinner (legacy fallback) ── */
+.spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 107, 53, 0.2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.logo-atom { font-size: 32px; display: inline-block; }
+.logo-atom.spinning { animation: spin 1s linear infinite; }
+
+.loading-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+/* ── Back button ── */
+.back-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  backdrop-filter: blur(12px);
+}
+
+.back-btn:hover {
+  background: var(--surface-2);
+  border-color: var(--border-2);
+  transform: translateX(-2px);
+  box-shadow: var(--shadow);
+}
+
+/* ── Empty state ── */
+.empty-txn {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-2);
+}
+
+.empty-txn button {
+  margin-top: 16px;
+  background: var(--gold-soft);
+  color: var(--gold-2);
+  border: 1px solid var(--gold-line);
+  padding: 12px 24px;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.empty-txn button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+  background: var(--gold-grad);
+  color: #3D2E05;
+  border-color: transparent;
+}
+
+/* ═══════════════════════════════════════════════════════
+   App Layout — Responsive
+   ═══════════════════════════════════════════════════════ */
+
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+@media (max-width: 767px) {
+  .app-layout { flex-direction: column; }
+  .app-main { min-height: 100vh; }
+}
+
+@media (min-width: 768px) {
+  .app-main {
+    max-width: 100%;
+    overflow-y: auto;
+    height: 100vh;
+  }
+  .app-main::-webkit-scrollbar { width: 6px; }
+  .app-main::-webkit-scrollbar-track { background: transparent; }
+  .app-main::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.10);
+    border-radius: 4px;
+  }
+  .app-main::-webkit-scrollbar-thumb:hover { background: var(--gold-line); }
+}

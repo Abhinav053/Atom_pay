@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="140" viewBox="0 0 220 140">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F2D98C"/>
+      <stop offset="0.55" stop-color="#D4AF37"/>
+      <stop offset="1" stop-color="#B8901E"/>
+    </linearGradient>
+    <linearGradient id="orange" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFB07A"/>
+      <stop offset="1" stop-color="#FF6B35"/>
+    </linearGradient>
+    <g id="pet"><path d="M0 8 C -13 -22 -13 -58 0 -90 C 13 -58 13 -22 0 8 Z"/></g>
+    <g id="ipet"><path d="M0 6 C -9 -18 -9 -44 0 -66 C 9 -44 9 -18 0 6 Z"/></g>
+  </defs>
+
+  <g transform="translate(110 120)">
+    <!-- base leaves -->
+    <g fill="url(#gold)" fill-opacity="0.55" stroke="#9A7B1A" stroke-width="1" stroke-linejoin="round">
+      <path d="M0 2 C -46 -8 -86 -2 -104 12 C -78 20 -38 16 0 6 Z"/>
+      <path d="M0 2 C 46 -8 86 -2 104 12 C 78 20 38 16 0 6 Z"/>
+    </g>
+
+    <!-- outer gold petals -->
+    <g fill="url(#gold)" stroke="#9A7B1A" stroke-width="1.1" stroke-linejoin="round">
+      <use href="#pet" transform="rotate(-56)"/>
+      <use href="#pet" transform="rotate(-37)"/>
+      <use href="#pet" transform="rotate(-18)"/>
+      <use href="#pet" transform="rotate(18)"/>
+      <use href="#pet" transform="rotate(37)"/>
+      <use href="#pet" transform="rotate(56)"/>
+    </g>
+
+    <!-- inner orange petals + crown petal -->
+    <g fill="url(#orange)" stroke="#C24E1E" stroke-width="0.8" stroke-linejoin="round">
+      <use href="#ipet" transform="rotate(-28)"/>
+      <use href="#ipet" transform="rotate(0)"/>
+      <use href="#ipet" transform="rotate(28)"/>
+    </g>
+
+    <!-- gold centre petal over the orange -->
+    <use href="#pet" transform="scale(0.62)" fill="url(#gold)" stroke="#9A7B1A" stroke-width="1.4"/>
+
+    <!-- seed bead -->
+    <circle cx="0" cy="2" r="5" fill="#FF6B35"/>
+  </g>
+</svg>

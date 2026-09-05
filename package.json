@@ -1,0 +1,49 @@
+{
+  "name": "atompay-microservices",
+  "version": "2.0.0",
+  "description": "Event-Driven Microservices Architecture for AtomPay Digital Wallet",
+  "main": "api-gateway/src/server.js",
+  "scripts": {
+    "start": "node api-gateway/src/server.js",
+    "start:gateway": "node api-gateway/src/server.js",
+    "start:auth": "node services/auth-service/index.js",
+    "start:wallet": "node services/wallet-service/index.js",
+    "start:payment": "node services/payment-service/index.js",
+    "start:webhook": "node services/webhook-service/index.js",
+    "start:ledger": "node services/ledger-service/index.js",
+    "start:refund": "node services/refund-service/index.js",
+    "start:notification": "node services/notification-service/index.js",
+    "start:payment-worker": "node workers/payment-worker/index.js",
+    "start:outbox-publisher": "node workers/outbox-publisher.js",
+    "start:reconciliation-worker": "node workers/reconciliation-worker/index.js",
+    "test": "node tests/scenarios.test.js"
+  },
+  "keywords": [
+    "digital-wallet",
+    "microservices",
+    "postgresql",
+    "redis",
+    "mongodb",
+    "bullmq",
+    "event-driven"
+  ],
+  "author": "AtomPay Architecture Team",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "bullmq": "^5.65.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "ioredis": "^5.11.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^6.13.10",
+    "nodemon": "^3.1.14",
+    "opossum": "^9.0.0",
+    "pg": "^8.11.3",
+    "qrcode": "^1.5.4",
+    "sib-api-v3-sdk": "^8.5.0",
+    "speakeasy": "^2.0.0",
+    "zod": "^4.4.3"
+  }
+}

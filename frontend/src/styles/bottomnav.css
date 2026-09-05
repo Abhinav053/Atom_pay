@@ -1,0 +1,77 @@
+@import './global.css';
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background: var(--surface-2);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding: 8px 0 20px;
+  z-index: 50;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.03);
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  padding: 8px 0;
+  transition: all 0.25s;
+  font-family: 'DM Sans', sans-serif;
+  position: relative;
+}
+
+.nav-item.active {
+  color: var(--accent);
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 2.5px;
+  background: var(--grad);
+  border-radius: 0 0 4px 4px;
+}
+
+.nav-icon {
+  font-size: 20px;
+  line-height: 1;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.nav-item.active .nav-icon {
+  transform: scale(1.15);
+}
+
+.nav-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+/* Hide bottom nav on desktop — replaced by SideNav */
+@media (min-width: 768px) {
+  .bottom-nav {
+    display: none;
+  }
+}
+/* ═══════════════════════════════════════════════════════
+   👑 ROYAL GOLD LAYER — Bottom Nav
+   ═══════════════════════════════════════════════════════ */
+.nav-item.active { color: var(--gold-2); }
+.nav-item.active::before { background: var(--gold-grad); box-shadow: 0 0 8px var(--gold-glow); }

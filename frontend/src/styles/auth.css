@@ -1,0 +1,320 @@
+/* ═══════════════════════════════════════════════════════
+   Auth (Login / Signup) — Royal Palace Gate
+   Ivory hall, gold leaf, a grand unforgettable entrance.
+   ═══════════════════════════════════════════════════════ */
+
+.auth-container {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow: hidden;
+  background:
+    radial-gradient(900px circle at 50% -15%, rgba(232, 196, 90, 0.20), transparent 55%),
+    radial-gradient(700px circle at 15% 110%, rgba(201, 162, 39, 0.12), transparent 50%),
+    radial-gradient(600px circle at 85% 90%, rgba(255, 107, 53, 0.06), transparent 45%),
+    linear-gradient(165deg, #FFFDF7 0%, #FFF8EA 50%, #FFF2DC 100%);
+}
+
+/* Sweeping throne-light behind the gate */
+.auth-container::before {
+  content: '';
+  position: absolute;
+  top: -45%;
+  left: 50%;
+  width: 130vmax;
+  height: 130vmax;
+  transform: translateX(-50%);
+  background: conic-gradient(
+    from 0deg at 50% 0%,
+    transparent 0deg,
+    rgba(232, 196, 90, 0.07) 9deg,
+    transparent 18deg,
+    transparent 30deg,
+    rgba(201, 162, 39, 0.05) 39deg,
+    transparent 48deg
+  );
+  animation: gate-rays 80s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes gate-rays { to { transform: translateX(-50%) rotate(360deg); } }
+
+/* Floating gold orbs */
+.auth-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.55;
+  pointer-events: none;
+  animation: orb-float 14s ease-in-out infinite;
+}
+
+.auth-orb-1 {
+  width: 360px;
+  height: 360px;
+  background: radial-gradient(circle, rgba(232, 196, 90, 0.28), transparent 70%);
+  top: -80px;
+  left: -60px;
+}
+
+.auth-orb-2 {
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(201, 162, 39, 0.22), transparent 70%);
+  bottom: -80px;
+  right: -40px;
+  animation-delay: -7s;
+}
+
+@keyframes orb-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(30px, -20px) scale(1.1); }
+}
+
+.auth-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  background: var(--surface);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(232, 196, 90, 0.45);
+  border-radius: 28px;
+  padding: 40px 32px;
+  box-shadow:
+    0 18px 60px rgba(201, 162, 39, 0.14),
+    0 8px 32px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  animation: card-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Gold crown-rail across the top of the card */
+.auth-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 18%;
+  right: 18%;
+  height: 2px;
+  border-radius: 0 0 4px 4px;
+  background: linear-gradient(90deg, transparent, var(--gold-2), var(--gold), var(--gold-2), transparent);
+  box-shadow: 0 0 12px var(--gold-glow);
+}
+
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.auth-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Royal crown above the wordmark */
+.auth-crown {
+  font-size: 22px;
+  line-height: 1;
+  margin-bottom: -4px;
+  background: var(--gold-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 5px rgba(201, 162, 39, 0.4));
+}
+
+.auth-wordmark {
+  font-family: 'Syne', sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.auth-wordmark span {
+  background: linear-gradient(95deg, #FF6B35 0%, #E8930F 48%, #B8901E 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes wordmark-shine {
+  0%   { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+/* Host greeting line under the brand */
+.auth-host {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 12px 0 2px;
+}
+
+.auth-host span {
+  width: 22px;
+  height: 1px;
+  background: var(--gold);
+  opacity: 0.5;
+}
+
+.auth-host em {
+  font-style: normal;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11.5px;
+  letter-spacing: 0.3px;
+  color: var(--text-3);
+}
+
+.auth-host em strong { color: var(--gold-2); font-weight: 700; }
+
+.auth-subtitle {
+  text-align: center;
+  color: var(--text-2);
+  font-size: 14px;
+  margin: 10px 0 24px;
+}
+
+/* Step indicator */
+.auth-steps {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+.auth-step-bar {
+  height: 3px;
+  flex: 1;
+  border-radius: 100px;
+  background: var(--track);
+  transition: background 0.3s;
+}
+
+.auth-step-bar.active { background: var(--grad); }
+
+.auth-form { display: flex; flex-direction: column; }
+
+/* OTP input */
+.otp-input {
+  font-size: 26px;
+  letter-spacing: 12px;
+  text-align: center;
+  font-family: 'Syne', sans-serif;
+}
+
+/* Buttons */
+.auth-btn {
+  width: 100%;
+  height: 52px;
+  border: none;
+  border-radius: 14px;
+  background: var(--grad);
+  color: #fff;
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 4px 16px rgba(255, 107, 53, 0.2);
+}
+
+.auth-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(255, 107, 53, 0.28);
+}
+
+.auth-btn:active:not(:disabled) { transform: translateY(0); }
+.auth-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+
+.auth-btn.ghost {
+  background: transparent;
+  border: 1.5px solid var(--border-2);
+  color: var(--text-2);
+  box-shadow: none;
+}
+
+.auth-btn.ghost:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: none;
+}
+
+.auth-link-btn {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  margin-top: 12px;
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  transition: color 0.2s;
+}
+
+.auth-link-btn:hover { color: var(--text-2); }
+
+/* Error */
+.auth-error {
+  background: var(--red-dim);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: var(--red);
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+/* Info / success */
+.auth-info {
+  background: var(--green-dim);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #0E7A57;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+/* Switch link */
+.auth-switch {
+  text-align: center;
+  color: var(--text-2);
+  font-size: 14px;
+  margin-top: 24px;
+}
+
+.auth-switch span {
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-switch span:hover { text-decoration: underline; }
+
+/* Royal seal — host signature at the foot of the gate */
+.auth-seal {
+  margin-top: 22px;
+  text-align: center;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.auth-seal strong { color: var(--gold-2); font-weight: 700; }
+
+.auth-seal::before,
+.auth-seal::after { content: '❖'; color: var(--gold); margin: 0 8px; font-size: 9px; }

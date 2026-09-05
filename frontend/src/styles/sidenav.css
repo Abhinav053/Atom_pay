@@ -1,0 +1,309 @@
+/* ═══════════════════════════════════════
+   SideNav — Desktop Only (≥768px)
+   Premium Light Glass Sidebar
+   ═══════════════════════════════════════ */
+
+.sidenav {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .sidenav {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 260px;
+    min-width: 260px;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-right: 1px solid var(--border);
+    padding: 24px 16px;
+    z-index: 60;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.03);
+  }
+
+  .sidenav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 12px 20px;
+  }
+
+  .sidenav-atom {
+    font-size: 24px;
+  }
+
+  .sidenav-brand {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+
+  .sidenav-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 12px;
+    margin-bottom: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+  }
+
+  .sidenav-avatar {
+    width: 38px;
+    height: 38px;
+    background: var(--grad);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(255, 107, 53, 0.18);
+  }
+
+  .sidenav-user-info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .sidenav-username {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sidenav-role {
+    font-size: 11px;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .sidenav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 8px;
+  }
+
+  .sidenav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 12px;
+    background: none;
+    border: none;
+    border-radius: 12px;
+    color: var(--text-2);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.25s;
+    position: relative;
+    text-align: left;
+    width: 100%;
+  }
+
+  .sidenav-link:hover {
+    background: var(--track);
+    color: var(--text);
+  }
+
+  .sidenav-link.active {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .sidenav-link-indicator {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 0;
+    background: var(--grad);
+    border-radius: 0 4px 4px 0;
+    transition: height 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .sidenav-link.active .sidenav-link-indicator {
+    height: 20px;
+  }
+
+  .sidenav-link-icon {
+    font-size: 18px;
+    width: 24px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .sidenav-link-label {
+    flex: 1;
+  }
+
+  /* AI Link Special Styling */
+  .ai-link .ai-icon {
+    background: var(--grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+  }
+
+  .ai-badge {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 2px 6px;
+    background: var(--grad);
+    color: white;
+    border-radius: 6px;
+    line-height: 1;
+  }
+
+  /* Bottom section */
+  .sidenav-bottom {
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+
+  .logout-link {
+    color: var(--text-3) !important;
+  }
+
+  .logout-link:hover {
+    color: var(--red) !important;
+    background: var(--red-dim) !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   👑 ROYAL GOLD LAYER — Sidebar
+   ═══════════════════════════════════════════════════════ */
+.sidenav-brand {
+  /* legible orange → gold wordmark (deep enough to read on cream) */
+  background: linear-gradient(95deg, #FF6B35 0%, #E8930F 48%, #B8901E 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  font-weight: 800 !important;
+}
+.sidenav-avatar {
+  background: var(--gold-grad) !important;
+  color: #3D2E05 !important;
+  box-shadow: var(--shadow-gold) !important;
+}
+.sidenav-link.active {
+  background: var(--gold-soft) !important;
+  color: var(--gold-2) !important;
+}
+.sidenav-link-indicator { background: var(--gold-grad) !important; }
+.ai-link .ai-icon { background: var(--gold-grad) !important; -webkit-background-clip: text !important; background-clip: text !important; -webkit-text-fill-color: transparent !important; }
+.ai-badge { background: var(--gold-grad) !important; color: #3D2E05 !important; }
+
+/* ═══════════════════════════════════════════════════════
+   👑 ROYAL SIDEBAR — distinct warm panel + lotus crest
+   ═══════════════════════════════════════════════════════ */
+
+/* A clearly separate, warmer panel (reads apart from the app) */
+.sidenav {
+  overflow: hidden;
+  background: linear-gradient(180deg, #FFFBF3 0%, #FFF5E6 100%) !important;
+  border-right: 1.5px solid var(--gold-line) !important;
+  box-shadow:
+    8px 0 36px rgba(201, 162, 39, 0.10),
+    2px 0 14px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* gold → orange filigree running down the inner edge */
+.sidenav::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(180deg, transparent, var(--gold), var(--accent), var(--gold), transparent);
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.sidenav-top,
+.sidenav-ornament,
+.sidenav-bottom { position: relative; z-index: 1; }
+
+/* the ornament fills the empty middle space */
+.sidenav-ornament {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px 8px;
+  min-height: 160px;
+}
+
+.sidenav-rule {
+  width: 70%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), var(--accent), var(--gold), transparent);
+  opacity: 0.8;
+}
+
+.sidenav-lotus {
+  width: 132px;
+  height: 80px;
+  background: url('/royal-lotus.svg') center / contain no-repeat;
+  filter: drop-shadow(0 4px 12px rgba(201, 162, 39, 0.25));
+  animation: lotus-breathe 5s ease-in-out infinite;
+}
+
+@keyframes lotus-breathe {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.95; }
+  50%      { transform: translateY(-3px) scale(1.03); opacity: 1; }
+}
+
+.sidenav-motto {
+  font-family: 'Syne', sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, var(--gold-2), var(--accent), var(--gold-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.sidenav-credit {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 0.4px;
+  color: var(--text-3);
+}
+.sidenav-credit strong { color: var(--gold-2); font-weight: 700; }
+
+/* gold → orange active indicator */
+.sidenav-link-indicator { background: linear-gradient(180deg, var(--gold), var(--accent)) !important; }
