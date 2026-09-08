@@ -14,6 +14,12 @@ AtomPay is a production-grade, event-driven microservices digital wallet and pay
 
 ## 🏗 Target Microservices Architecture
 
+
+
+### High-Level Design
+
+![AtomPay HLD Architecture](https://raw.githubusercontent.com/Abhinav053/atom_pay_hld/refs/heads/main/Screenshot%202026-09-08%20192617.png)
+
 ```text
                                 CLIENT
                                    |
