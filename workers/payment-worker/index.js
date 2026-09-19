@@ -104,6 +104,23 @@ function startPaymentWorker() {
                     [providerResult.status, providerResult.gatewayTxnId, providerResult.failureReason, paymentId]
                 );
 
+                // If payment failed explicitly, publish PAYMENT_FAILED outbox event
+                if (providerResult.status === "FAILED") {
+                    const crypto = require("crypto");
+                    const outboxPayload = {
+                        eventId: crypto.randomUUID(),
+                        eventType: EVENT_TYPES.PAYMENT_FAILED,
+                        aggregateType: "payment",
+                        aggregateId: paymentId,
+                        payload: { paymentId, userId, amount, provider: provider || "MOCK_GATEWAY", failureReason: providerResult.failureReason }
+                    };
+                    await pool.query(
+                        `INSERT INTO outbox_events (event_id, event_type, aggregate_type, aggregate_id, payload, status)
+                         VALUES ($1, $2, $3, $4, $5, 'PENDING')`,
+                        [outboxPayload.eventId, outboxPayload.eventType, outboxPayload.aggregateType, outboxPayload.aggregateId, JSON.stringify(outboxPayload.payload)]
+                    );
+                }
+
                 logger.info("Payment worker processed attempt", { paymentId, status: providerResult.status });
                 return providerResult;
             } finally {

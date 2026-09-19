@@ -168,15 +168,62 @@ services:
     build:
       context: .
       dockerfile: workers/payment-worker/Dockerfile
+    container_name: payment-worker
     environment:
-      DATABASE_URL: postgres://postgres:postgres@postgres:5432/atompay
-      MONGO_URL: mongodb://mongo:27017/atompay?replicaSet=rs0
-      REDIS_URL: redis://redis:6379
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/atompay
+      - REDIS_URL=redis://redis:6379
+      - MONGO_URL=mongodb://mongodb:27017/atompay
+      - LOG_LEVEL=debug
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - postgres
+      - redis
+      - mongo
+    restart: unless-stopped
+
+  diagnosis-service:
+    build:
+      context: ./services/diagnosis-service
+      dockerfile: Dockerfile
+    container_name: diagnosis-service
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  recovery-orchestrator:
+    build:
+      context: .
+      dockerfile: workers/payment-worker/Dockerfile
+    container_name: recovery-orchestrator
+    command: node workers/recovery-orchestrator/index.js
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/atompay
+      - REDIS_URL=redis://redis:6379
+      - DIAGNOSIS_SERVICE_URL=http://diagnosis-service:8000/diagnose
+      - MAX_RETRY_ATTEMPTS=3
+      - MIN_CONFIDENCE=0.85
+      - MIN_RECOVERY_AMOUNT=50.0
+      - LOG_LEVEL=debug
+    depends_on:
+      - postgres
+      - redis
+      - diagnosis-service
+    restart: unless-stopped
+
+  recovery-executor:
+    build:
+      context: .
+      dockerfile: workers/payment-worker/Dockerfile
+    container_name: recovery-executor
+    command: node workers/recovery-executor/index.js
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/atompay
+      - REDIS_URL=redis://redis:6379
+      - LOG_LEVEL=debug
+    depends_on:
+      - postgres
+      - redis
     restart: unless-stopped
 
   outbox-publisher:
@@ -207,28 +254,28 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  atomai:
-    build:
-      context: ./AtomAI_service
-    ports:
-      - "8000:8000"
-    environment:
-      PORT: 8000
-      MONGO_URL: mongodb://mongo:27017/atompay?replicaSet=rs0
-      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
-      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
-      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
-      VERIFY_RESPONSES: ${VERIFY_RESPONSES:-true}
-    depends_on:
-      mongo:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 15s
-    restart: unless-stopped
+#  atomai:
+#    build:
+#      context: ./AtomAI_service
+#    ports:
+#      - "8000:8000"
+#    environment:
+#      PORT: 8000
+#      MONGO_URL: mongodb://mongo:27017/atompay?replicaSet=rs0
+#      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+#      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
+#      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
+#      VERIFY_RESPONSES: ${VERIFY_RESPONSES:-true}
+#    depends_on:
+#      mongo:
+#        condition: service_healthy
+#    healthcheck:
+#      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 10
+#      start_period: 15s
+#    restart: unless-stopped
 
   postgres:
     image: postgres:15-alpine

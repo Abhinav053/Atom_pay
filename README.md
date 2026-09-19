@@ -72,10 +72,34 @@ AtomPay is a production-grade, event-driven microservices digital wallet and pay
      +---+---+
      |       |
      v       v
-  SUCCESS  FAILED
-     |
+  SUCCESS  FAILED 
+     |       |
+     |       +------> Outbox -> Recovery Orchestrator
+     |                               |
+     |                               v
+     |                     Python Diagnosis Service (Gemini AI)
+     |                               |
+     |                               v
+     |                       Deterministic Policy Engine
+     |                               |
+     |                               v
+     |                       Recovery Executor (Retry / Notify)
      v
   Ledger
+
+---
+
+### 🤖 AI-Powered Payment Failure Recovery
+AtomPay includes an advanced AI-powered recovery subsystem to handle failed payments intelligently without compromising deterministic execution.
+
+1. **Detection**: When a payment state transitions to `FAILED`, a `PAYMENT_FAILED` event is emitted.
+2. **Diagnosis**: The `Recovery Orchestrator` consumes the event and queries the Python-based `Diagnosis Service`. A Gemini LLM analyzes the failure context (e.g., error codes, history, provider) and returns a structured diagnosis category and confidence score.
+3. **Deterministic Policy**: The orchestrator evaluates the diagnosis against deterministic economic rules in the `Policy Engine` (e.g., cost to retry, attempt limits).
+4. **Action**: The policy decides an action (`RETRY_SCHEDULED`, `NOTIFY_CUSTOMER`, `ESCALATE_HUMAN`, or `NO_ACTION`) and dispatches it to the `Recovery Executor`.
+5. **Execution**: The executor strictly implements the action (e.g., scheduling a retry by routing to an alternate provider).
+6. **Audit**: Every step is recorded in the `recovery_audit` PostgreSQL table for explainability.
+
+> **Core Principle:** AI diagnoses. Policy authorizes. Existing infrastructure executes. Ledger records money.
 ```
 
 ---
@@ -213,16 +237,31 @@ MAINTENANCE_MODE=false
 ```
 
 ### 2. Run with Docker Compose
-Start the complete containerized stack (Gateway, 7 Microservices, 3 Workers, PostgreSQL, MongoDB, Redis, AtomAI, Frontend):
+1.  **Clone the repository:**
+    ```bash
+    git clone <your_repo_url>
+    cd AtomPay_Microservice
+    ```
 
-```bash
-docker compose up --build -d
-```
+2.  **Environment Variables:**
+    Copy the sample configuration:
+    ```bash
+    cp .env.example .env
+    ```
+    Add your `GEMINI_API_KEY` to the `.env` file for the AI Diagnosis Service.
 
-Check running services:
-```bash
-docker compose ps
-```
+3.  **Start all services:**
+    ```bash
+    docker-compose up --build
+    ```
+    
+4. **Trigger a Payment Recovery (Test):**
+   Initiate a payment that is designed to fail (e.g., mock provider randomly fails). 
+   You can view the failure recovery in action by observing logs from `recovery-orchestrator` and `recovery-executor`.
+   Audit records can be checked via PostgreSQL:
+   ```sql
+   SELECT * FROM recovery_audit;
+   ```
 
 ---
 
