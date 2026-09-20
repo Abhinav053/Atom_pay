@@ -2,15 +2,6 @@
 # AtomPay Microservices Ecosystem — Render Blueprint
 # =========================================================
 
-databases:
-  # =======================================================
-  # POSTGRESQL
-  # =======================================================
-  - name: atompay-db
-    databaseName: atompay
-    plan: free
-
-
 services:
 
   # =======================================================
@@ -38,9 +29,7 @@ services:
         value: "3000"
 
       - key: DATABASE_URL
-        fromDatabase:
-          name: atompay-db
-          property: connectionString
+        sync: false
 
       - key: REDIS_URL
         fromService:
@@ -111,9 +100,7 @@ services:
         value: "3001"
 
       - key: DATABASE_URL
-        fromDatabase:
-          name: atompay-db
-          property: connectionString
+        sync: false
 
       - key: REDIS_URL
         fromService:
@@ -148,9 +135,7 @@ services:
         value: "3002"
 
       - key: DATABASE_URL
-        fromDatabase:
-          name: atompay-db
-          property: connectionString
+        sync: false
 
       - key: REDIS_URL
         fromService:
@@ -173,9 +158,7 @@ services:
         value: "3003"
 
       - key: DATABASE_URL
-        fromDatabase:
-          name: atompay-db
-          property: connectionString
+        sync: false
 
       - key: REDIS_URL
         fromService:
@@ -198,9 +181,7 @@ services:
         value: "3004"
 
       - key: DATABASE_URL
-        fromDatabase:
-          name: atompay-db
-          property: connectionString
+        sync: false
 
       - key: REDIS_URL
         fromService:
@@ -223,9 +204,7 @@ services:
         value: "3005"
 
       - key: DATABASE_URL
-        fromDatabase:
-          name: atompay-db
-          property: connectionString
+        sync: false
 
       - key: REDIS_URL
         fromService:
@@ -251,9 +230,7 @@ services:
         value: "3006"
 
       - key: DATABASE_URL
-        fromDatabase:
-          name: atompay-db
-          property: connectionString
+        sync: false
 
 
   # =======================================================
@@ -290,9 +267,7 @@ services:
 
     envVars:
       - key: DATABASE_URL
-        fromDatabase:
-          name: atompay-db
-          property: connectionString
+        sync: false
 
       - key: REDIS_URL
         fromService:
@@ -321,9 +296,7 @@ services:
 
     envVars:
       - key: DATABASE_URL
-        fromDatabase:
-          name: atompay-db
-          property: connectionString
+        sync: false
 
       - key: REDIS_URL
         fromService:
@@ -343,9 +316,7 @@ services:
 
     envVars:
       - key: DATABASE_URL
-        fromDatabase:
-          name: atompay-db
-          property: connectionString
+        sync: false
 
       - key: REDIS_URL
         fromService:
