@@ -177,29 +177,25 @@ Run the test suite to verify system resilience:
 ```bash
 $env:NODE_PATH="backend/node_modules"; node tests/scenarios.test.js
 ```
+### Verified Scenarios
 
-### Verified Scenarios:
-Same payment request sent twice returns cached response.
-Same idempotency key sent concurrently handles lock contention cleanly.
-Two workers processing the same payment are synchronized by Redis distributed locks.
-Worker crash leaves lock to expire safely.
-Provider timeout sets status to UNKNOWN, not FAILED.
-Lost HTTP responses are recovered by status lookup / webhooks.
-Provider duplicate webhooks are deduplicated via event IDs.
-Invalid HMAC webhook signatures are rejected (401).
-Missing webhooks are caught and resolved by the Reconciliation Worker.
-Rate limiter fails open gracefully if Redis is temporarily offline.
-PostgreSQL transaction rolls back balance changes on insufficient funds.
-Outbox Publisher safely retries pending events upon recovery.
-Payment provider errors trip the Circuit Breaker.
-Circuit Breaker OPEN state rejects external calls fast without hanging.
-Payment status remains UNKNOWN if the provider is still unreachable.
-Reconciliation resolves UNKNOWN → SUCCESS after provider query.
-Double-entry ledger invariant verifies SUM(DEBIT) == SUM(CREDIT).
-
-
----
-
+1. Same payment request sent twice returns the cached response.
+2. Same idempotency key sent concurrently handles lock contention cleanly.
+3. Two workers processing the same payment are synchronized by Redis distributed locks.
+4. Worker crash leaves the lock to expire safely.
+5. Provider timeout sets status to `UNKNOWN`, not `FAILED`.
+6. Lost HTTP responses are recovered through status lookup or webhooks.
+7. Duplicate provider webhooks are deduplicated using event IDs.
+8. Invalid HMAC webhook signatures are rejected with `401 Unauthorized`.
+9. Missing webhooks are detected and resolved by the Reconciliation Worker.
+10. Rate limiter fails open gracefully if Redis is temporarily unavailable.
+11. PostgreSQL transaction rolls back balance changes when funds are insufficient.
+12. Outbox Publisher safely retries pending events after recovery.
+13. Payment provider errors trip the Circuit Breaker.
+14. Circuit Breaker `OPEN` state rejects external calls immediately without hanging.
+15. Payment status remains `UNKNOWN` while the provider is unreachable.
+16. Reconciliation resolves `UNKNOWN` → `SUCCESS` after querying the provider.
+17. Double-entry ledger invariant verifies `SUM(DEBIT) == SUM(CREDIT)`.
 ## 🚀 Local Development & Docker Instructions
 
 ### 1. Environment Setup
