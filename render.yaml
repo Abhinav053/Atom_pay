@@ -281,8 +281,9 @@ services:
   # ---------------------------------------------------------
   # 12. FRONTEND WEB APP
   # ---------------------------------------------------------
-  - type: static
+  - type: web
     name: atompay-frontend
+    env: static
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: frontend/dist
     routes:
