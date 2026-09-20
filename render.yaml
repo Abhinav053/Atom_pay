@@ -3,22 +3,28 @@
 # =========================================================
 
 databases:
+  # PostgreSQL
   - name: atompay-db
     databaseName: atompay
-    plan: free
-
-  - name: atompay-redis
     plan: free
 
 
 services:
 
   # =========================================================
+  # REDIS / KEY VALUE
+  # =========================================================
+  - type: keyvalue
+    name: atompay-redis
+    plan: free
+
+
+  # =========================================================
   # 1. API GATEWAY
   # =========================================================
   - type: web
     name: atompay-api-gateway
-    env: docker
+    runtime: docker
     dockerfilePath: api-gateway/Dockerfile
     plan: free
     healthCheckPath: /api
@@ -33,8 +39,9 @@ services:
           property: connectionString
 
       - key: REDIS_URL
-        fromRedis:
+        fromService:
           name: atompay-redis
+          type: keyvalue
           property: connectionString
 
       - key: MONGO_URL
@@ -45,44 +52,44 @@ services:
 
       - key: AUTH_SERVICE_URL
         fromService:
-          type: web
           name: atompay-auth-service
+          type: web
           property: host
 
       - key: WALLET_SERVICE_URL
         fromService:
-          type: web
           name: atompay-wallet-service
+          type: web
           property: host
 
       - key: PAYMENT_SERVICE_URL
         fromService:
-          type: web
           name: atompay-payment-service
+          type: web
           property: host
 
       - key: REFUND_SERVICE_URL
         fromService:
-          type: web
           name: atompay-refund-service
+          type: web
           property: host
 
       - key: WEBHOOK_SERVICE_URL
         fromService:
-          type: web
           name: atompay-webhook-service
+          type: web
           property: host
 
       - key: LEDGER_SERVICE_URL
         fromService:
-          type: web
           name: atompay-ledger-service
+          type: web
           property: host
 
       - key: NOTIFICATION_SERVICE_URL
         fromService:
-          type: web
           name: atompay-notification-service
+          type: web
           property: host
 
 
@@ -91,7 +98,7 @@ services:
   # =========================================================
   - type: web
     name: atompay-auth-service
-    env: docker
+    runtime: docker
     dockerfilePath: services/auth-service/Dockerfile
     plan: free
 
@@ -105,14 +112,15 @@ services:
           property: connectionString
 
       - key: REDIS_URL
-        fromRedis:
+        fromService:
           name: atompay-redis
+          type: keyvalue
           property: connectionString
 
       - key: JWT_SECRET
         fromService:
-          type: web
           name: atompay-api-gateway
+          type: web
           envVarKey: JWT_SECRET
 
       - key: BREVO_API_KEY
@@ -127,7 +135,7 @@ services:
   # =========================================================
   - type: web
     name: atompay-wallet-service
-    env: docker
+    runtime: docker
     dockerfilePath: services/wallet-service/Dockerfile
     plan: free
 
@@ -141,8 +149,9 @@ services:
           property: connectionString
 
       - key: REDIS_URL
-        fromRedis:
+        fromService:
           name: atompay-redis
+          type: keyvalue
           property: connectionString
 
 
@@ -151,7 +160,7 @@ services:
   # =========================================================
   - type: web
     name: atompay-payment-service
-    env: docker
+    runtime: docker
     dockerfilePath: services/payment-service/Dockerfile
     plan: free
 
@@ -165,8 +174,9 @@ services:
           property: connectionString
 
       - key: REDIS_URL
-        fromRedis:
+        fromService:
           name: atompay-redis
+          type: keyvalue
           property: connectionString
 
 
@@ -175,7 +185,7 @@ services:
   # =========================================================
   - type: web
     name: atompay-refund-service
-    env: docker
+    runtime: docker
     dockerfilePath: services/refund-service/Dockerfile
     plan: free
 
@@ -189,8 +199,9 @@ services:
           property: connectionString
 
       - key: REDIS_URL
-        fromRedis:
+        fromService:
           name: atompay-redis
+          type: keyvalue
           property: connectionString
 
 
@@ -199,7 +210,7 @@ services:
   # =========================================================
   - type: web
     name: atompay-webhook-service
-    env: docker
+    runtime: docker
     dockerfilePath: services/webhook-service/Dockerfile
     plan: free
 
@@ -213,8 +224,9 @@ services:
           property: connectionString
 
       - key: REDIS_URL
-        fromRedis:
+        fromService:
           name: atompay-redis
+          type: keyvalue
           property: connectionString
 
       - key: MONGO_URL
@@ -226,7 +238,7 @@ services:
   # =========================================================
   - type: web
     name: atompay-ledger-service
-    env: docker
+    runtime: docker
     dockerfilePath: services/ledger-service/Dockerfile
     plan: free
 
@@ -245,7 +257,7 @@ services:
   # =========================================================
   - type: web
     name: atompay-notification-service
-    env: docker
+    runtime: docker
     dockerfilePath: services/notification-service/Dockerfile
     plan: free
 
@@ -254,8 +266,9 @@ services:
         value: "3007"
 
       - key: REDIS_URL
-        fromRedis:
+        fromService:
           name: atompay-redis
+          type: keyvalue
           property: connectionString
 
       - key: MONGO_URL
@@ -267,7 +280,7 @@ services:
   # =========================================================
   - type: worker
     name: atompay-payment-worker
-    env: docker
+    runtime: docker
     dockerfilePath: workers/payment-worker/Dockerfile
     plan: free
 
@@ -278,8 +291,9 @@ services:
           property: connectionString
 
       - key: REDIS_URL
-        fromRedis:
+        fromService:
           name: atompay-redis
+          type: keyvalue
           property: connectionString
 
       - key: MONGO_URL
@@ -287,8 +301,8 @@ services:
 
       - key: PAYMENT_WEBHOOK_URL
         fromService:
-          type: web
           name: atompay-webhook-service
+          type: web
           property: host
 
 
@@ -297,7 +311,7 @@ services:
   # =========================================================
   - type: worker
     name: atompay-outbox-publisher
-    env: docker
+    runtime: docker
     dockerfilePath: workers/outbox-publisher.Dockerfile
     plan: free
 
@@ -308,8 +322,9 @@ services:
           property: connectionString
 
       - key: REDIS_URL
-        fromRedis:
+        fromService:
           name: atompay-redis
+          type: keyvalue
           property: connectionString
 
 
@@ -318,7 +333,7 @@ services:
   # =========================================================
   - type: worker
     name: atompay-reconciliation-worker
-    env: docker
+    runtime: docker
     dockerfilePath: workers/reconciliation-worker/Dockerfile
     plan: free
 
@@ -329,8 +344,9 @@ services:
           property: connectionString
 
       - key: REDIS_URL
-        fromRedis:
+        fromService:
           name: atompay-redis
+          type: keyvalue
           property: connectionString
 
 
@@ -339,7 +355,7 @@ services:
   # =========================================================
   - type: web
     name: atompay-frontend
-    env: static
+    runtime: static
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: frontend/dist
 
