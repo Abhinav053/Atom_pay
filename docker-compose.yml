@@ -173,57 +173,13 @@ services:
       - DATABASE_URL=postgres://postgres:postgres@postgres:5432/atompay
       - REDIS_URL=redis://redis:6379
       - MONGO_URL=mongodb://mongodb:27017/atompay
+      - PAYMENT_WEBHOOK_URL=http://webhook-service:3005/payment
+      - PAYMENT_WEBHOOK_SECRET=${PAYMENT_WEBHOOK_SECRET:-dev-payment-webhook-secret}
       - LOG_LEVEL=debug
     depends_on:
       - postgres
       - redis
       - mongo
-    restart: unless-stopped
-
-  diagnosis-service:
-    build:
-      context: ./services/diagnosis-service
-      dockerfile: Dockerfile
-    container_name: diagnosis-service
-    environment:
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
-    ports:
-      - "8000:8000"
-    restart: unless-stopped
-
-  recovery-orchestrator:
-    build:
-      context: .
-      dockerfile: workers/payment-worker/Dockerfile
-    container_name: recovery-orchestrator
-    command: node workers/recovery-orchestrator/index.js
-    environment:
-      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/atompay
-      - REDIS_URL=redis://redis:6379
-      - DIAGNOSIS_SERVICE_URL=http://diagnosis-service:8000/diagnose
-      - MAX_RETRY_ATTEMPTS=3
-      - MIN_CONFIDENCE=0.85
-      - MIN_RECOVERY_AMOUNT=50.0
-      - LOG_LEVEL=debug
-    depends_on:
-      - postgres
-      - redis
-      - diagnosis-service
-    restart: unless-stopped
-
-  recovery-executor:
-    build:
-      context: .
-      dockerfile: workers/payment-worker/Dockerfile
-    container_name: recovery-executor
-    command: node workers/recovery-executor/index.js
-    environment:
-      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/atompay
-      - REDIS_URL=redis://redis:6379
-      - LOG_LEVEL=debug
-    depends_on:
-      - postgres
-      - redis
     restart: unless-stopped
 
   outbox-publisher:

@@ -159,26 +159,6 @@ CREATE TABLE IF NOT EXISTS outbox_events (
     published_at TIMESTAMPTZ
 );
 
--- RECOVERY AUDIT TABLE
-CREATE TABLE IF NOT EXISTS recovery_audit (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    recovery_id VARCHAR(255) UNIQUE NOT NULL,
-    payment_id VARCHAR(255) NOT NULL REFERENCES payments(payment_id),
-    transaction_id VARCHAR(255),
-    diagnosis_category VARCHAR(100),
-    diagnosis_confidence NUMERIC(5, 4),
-    diagnosis_evidence TEXT,
-    policy_action VARCHAR(50),
-    attempt_number INT NOT NULL,
-    provider VARCHAR(50),
-    execution_status VARCHAR(50),
-    amount_at_risk NUMERIC(15, 2),
-    amount_recovered NUMERIC(15, 2),
-    error_message TEXT,
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-);
-
 -- INDEXES FOR PERFORMANCE AND QUICK LOOKUPS
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
@@ -192,4 +172,3 @@ CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status);
 CREATE INDEX IF NOT EXISTS idx_payment_attempts_payment ON payment_attempts(payment_id);
 CREATE INDEX IF NOT EXISTS idx_outbox_status ON outbox_events(status, created_at);
 CREATE INDEX IF NOT EXISTS idx_idempotency_key ON idempotency_records(key);
-CREATE INDEX IF NOT EXISTS idx_recovery_audit_payment ON recovery_audit(payment_id);

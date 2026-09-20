@@ -10,8 +10,7 @@ const QUEUES = {
     PAYMENT_FAILED: "payment.failed",
     PAYMENT_REFUND: "payment.refund",
     NOTIFICATION_SEND: "notification.send",
-    RECONCILIATION_CHECK: "reconciliation.check",
-    RECOVERY_EXECUTE: "recovery.execute"
+    RECONCILIATION_CHECK: "reconciliation.check"
 };
 
 const EVENT_TYPES = {
@@ -25,11 +24,7 @@ const EVENT_TYPES = {
     REFUND_INITIATED: "refund.initiated",
     REFUND_COMPLETED: "refund.completed",
     REFUND_FAILED: "refund.failed",
-    WEBHOOK_RECEIVED: "webhook.received",
-    RECOVERY_REQUESTED: "recovery.requested",
-    RECOVERY_DIAGNOSED: "recovery.diagnosed",
-    RECOVERY_DECISION: "recovery.decision",
-    RECOVERY_EXECUTED: "recovery.executed"
+    WEBHOOK_RECEIVED: "webhook.received"
 };
 
 module.exports = {

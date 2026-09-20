@@ -5,6 +5,8 @@ const { createCircuitBreaker } = require("../../packages/circuit-breaker");
 const logger = require("../../packages/logger");
 const mongoose = require("mongoose");
 
+const crypto = require("crypto");
+
 // Provider Mock Call (simulating provider gateway)
 async function callExternalProvider({ paymentId, userId, amount, provider }) {
     // 10% chance provider unavailable (throw network timeout error)
@@ -14,14 +16,100 @@ async function callExternalProvider({ paymentId, userId, amount, provider }) {
         throw error;
     }
 
-    // 80% success rate
-    const status = Math.random() < 0.8 ? "SUCCESS" : "FAILED";
-    return {
+    const gatewayTxnId = `mock_gw_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const redis = getRedis();
+    const stateKey = `mock_provider:pay:${paymentId}`;
+
+    // Store initial provider state as PROCESSING in Redis store (24h TTL)
+    await redis.set(stateKey, JSON.stringify({
         paymentId,
-        status,
-        gatewayTxnId: `mock_gw_${Date.now()}`,
-        failureReason: status === "FAILED" ? "Insufficient funds in provider bank" : null
+        userId,
+        amount: parseFloat(amount),
+        provider: provider || "MOCK_GATEWAY",
+        gatewayTxnId,
+        status: "PROCESSING",
+        failureReason: null
+    }), "EX", 86400);
+
+    // Asynchronously determine payment result & dispatch signed Webhook to Webhook Service
+    setTimeout(async () => {
+        const status = Math.random() < 0.8 ? "SUCCESS" : "FAILED";
+        const failureReason = status === "FAILED" ? "Insufficient funds in provider bank" : null;
+
+        // Persist final provider status in state store
+        await redis.set(stateKey, JSON.stringify({
+            paymentId,
+            userId,
+            amount: parseFloat(amount),
+            provider: provider || "MOCK_GATEWAY",
+            gatewayTxnId,
+            status,
+            failureReason
+        }), "EX", 86400);
+
+        const webhookPayload = {
+            paymentId,
+            userId,
+            amount: parseFloat(amount),
+            status,
+            gatewayTxnId,
+            failureReason,
+            provider: provider || "MOCK_GATEWAY"
+        };
+
+        const webhookSecret = process.env.PAYMENT_WEBHOOK_SECRET || "dev-payment-webhook-secret";
+        const webhookUrl = process.env.PAYMENT_WEBHOOK_URL || "http://localhost:3005/payment";
+
+        const signature = crypto
+            .createHmac("sha256", webhookSecret)
+            .update(JSON.stringify(webhookPayload))
+            .digest("hex");
+
+        try {
+            const response = await fetch(webhookUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-payment-signature": signature
+                },
+                body: JSON.stringify(webhookPayload)
+            });
+            logger.info("Mock external provider sent webhook callback", { paymentId, status, httpStatus: response.status });
+        } catch (err) {
+            logger.error("Mock external provider webhook delivery error", { paymentId, error: err.message });
+        }
+    }, 500);
+
+    // Synchronous initiation acceptance response to worker
+    return {
+        accepted: true,
+        paymentId,
+        gatewayTxnId
     };
+}
+
+async function getExternalPaymentStatus(paymentId) {
+    try {
+        const redis = getRedis();
+        const raw = await redis.get(`mock_provider:pay:${paymentId}`);
+        if (!raw) {
+            return {
+                paymentId,
+                status: "PROCESSING",
+                gatewayTxnId: null,
+                failureReason: null
+            };
+        }
+        return JSON.parse(raw);
+    } catch (err) {
+        logger.error("Error querying provider status API", { paymentId, error: err.message });
+        return {
+            paymentId,
+            status: "PROCESSING",
+            gatewayTxnId: null,
+            failureReason: err.message
+        };
+    }
 }
 
 const paymentBreaker = createCircuitBreaker(callExternalProvider, {
@@ -79,10 +167,10 @@ function startPaymentWorker() {
 
                 let providerResult;
                 try {
-                    // Call Provider via Circuit Breaker
+                    // Initiate Payment with Provider via Circuit Breaker
                     providerResult = await paymentBreaker.fire({ paymentId, userId, amount, provider });
                 } catch (err) {
-                    logger.error("Provider execution error / timeout", { paymentId, error: err.message });
+                    logger.error("Provider initiation error / timeout", { paymentId, error: err.message });
                     // CRITICAL REQUIREMENT: Mark state as UNKNOWN, do NOT mark as FAILED on network/timeout error!
                     await pool.query(
                         `UPDATE payments SET status = 'UNKNOWN', failure_reason = $1, updated_at = CURRENT_TIMESTAMP WHERE payment_id = $2`,
@@ -91,38 +179,21 @@ function startPaymentWorker() {
                     return { status: "UNKNOWN", error: err.message };
                 }
 
-                // Record Payment Attempt in PostgreSQL
+                // Record Initial Payment Attempt in PostgreSQL
                 await pool.query(
                     `INSERT INTO payment_attempts (payment_id, attempt_number, provider, provider_payment_id, status, error_message)
-                     VALUES ($1, $2, $3, $4, $5, $6)`,
-                    [paymentId, job.attemptsMade + 1, provider || "MOCK_GATEWAY", providerResult.gatewayTxnId, providerResult.status, providerResult.failureReason]
+                     VALUES ($1, $2, $3, $4, 'PROCESSING', NULL)`,
+                    [paymentId, job.attemptsMade + 1, provider || "MOCK_GATEWAY", providerResult.gatewayTxnId]
                 );
 
-                // Update Payment Final Status
+                // Update Payment with Gateway Transaction ID (State remains PROCESSING, awaiting webhook)
                 await pool.query(
-                    `UPDATE payments SET status = $1, gateway_txn_id = $2, failure_reason = $3, updated_at = CURRENT_TIMESTAMP WHERE payment_id = $4`,
-                    [providerResult.status, providerResult.gatewayTxnId, providerResult.failureReason, paymentId]
+                    `UPDATE payments SET gateway_txn_id = $1, updated_at = CURRENT_TIMESTAMP WHERE payment_id = $2`,
+                    [providerResult.gatewayTxnId, paymentId]
                 );
 
-                // If payment failed explicitly, publish PAYMENT_FAILED outbox event
-                if (providerResult.status === "FAILED") {
-                    const crypto = require("crypto");
-                    const outboxPayload = {
-                        eventId: crypto.randomUUID(),
-                        eventType: EVENT_TYPES.PAYMENT_FAILED,
-                        aggregateType: "payment",
-                        aggregateId: paymentId,
-                        payload: { paymentId, userId, amount, provider: provider || "MOCK_GATEWAY", failureReason: providerResult.failureReason }
-                    };
-                    await pool.query(
-                        `INSERT INTO outbox_events (event_id, event_type, aggregate_type, aggregate_id, payload, status)
-                         VALUES ($1, $2, $3, $4, $5, 'PENDING')`,
-                        [outboxPayload.eventId, outboxPayload.eventType, outboxPayload.aggregateType, outboxPayload.aggregateId, JSON.stringify(outboxPayload.payload)]
-                    );
-                }
-
-                logger.info("Payment worker processed attempt", { paymentId, status: providerResult.status });
-                return providerResult;
+                logger.info("Payment worker initiated payment, awaiting webhook callback", { paymentId, gatewayTxnId: providerResult.gatewayTxnId });
+                return { status: "INITIATED", accepted: true, paymentId, gatewayTxnId: providerResult.gatewayTxnId };
             } finally {
                 // Release Redis Distributed Lock
                 await redis.del(lockKey);
@@ -159,3 +230,6 @@ if (require.main === module) {
 }
 
 module.exports = startPaymentWorker;
+module.exports.startPaymentWorker = startPaymentWorker;
+module.exports.callExternalProvider = callExternalProvider;
+module.exports.getExternalPaymentStatus = getExternalPaymentStatus;
