@@ -42,46 +42,40 @@ AtomPay is a production-grade, event-driven microservices digital wallet and pay
                                                               v
                                                      BullMQ / Message Broker
                                                               |
-                  +-------------------------------------------+----------------+
-                  |                                           |                |
-                  v                                           v                v
-            Payment Worker                              Ledger Service   Notification
-                  |                                           |                Service
-                  v                                           v
-            Circuit Breaker                              PostgreSQL
+                  +------------------------------------------+----------------+
+                  |                                                           |
+                  v                                                           v
+            Payment Worker                                              Notification
+                  |                                                        Service
+                  v                                                           |
+            Circuit Breaker                                                 MongoDB
                   |
                   v
-            Provider Adapter
-                  |
-         +--------+---------+
-         |                  |
-         v                  v
-     Provider A         Provider B
-         |
-         v
-     Payment Gateway
-         |
-         v
-    Webhook Service
-         |
-         v
-      MongoDB
-         |
-         v
-     Event / Queue
-         |
-         v
-  Payment Status Handler
-         |
-     State Machine
-         |
-     +---+---+
-     |       |
-     v       v
-  SUCCESS  FAILED
-     |
-     v
-  Ledger
+         Mock External Provider (Stateful Store in Redis)
+         /                                       \
+   immediate initiation                      asynchronous callback
+       acceptance                                (delay ~500ms)
+            |                                          |
+            v                                          v
+    State = PROCESSING                         Webhook Service
+    (or UNKNOWN on timeout)                            |
+            |                                 HMAC SHA-256 Signature +
+            |                                  Redis Deduplication Lock
+            |                                          |
+            |                                          v
+            |                          +───────────────────────────────+
+            |                          │ SHARED PAYMENT FINALIZER      │
+            |                          │ (packages/payment-finalizer)  │
+            |                          +───────────────┬───────────────+
+            |                                          │
+            +───────────────────────+                  │
+                                    │                  v
+                                    v          PostgreSQL Finalization:
+                          Reconciliation Worker ──► • State = SUCCESS / FAILED
+                                    │               • Wallet Credit Balance
+                                    v               • Double-Entry Ledger
+                          Provider Status API       • Outbox Events
+
 ```
 
 ---
@@ -121,6 +115,7 @@ AtomPay_Microservice/
 │   ├── outbox-publisher.js # Polling Daemon Publishing Outbox Events to BullMQ
 │   └── reconciliation-worker/# Periodically Resolves UNKNOWN & Stuck Payments
 ├── packages/
+│   ├── payment-finalizer/  # Shared Atomic Payment Finalization Engine (Idempotent DB Settlement)
 │   ├── shared-events/      # Domain Event Constants & BullMQ Queue Definitions
 │   ├── database/           # PostgreSQL Pool, Redis Client, Mongoose Helpers
 │   ├── logger/             # Structured JSON Logger with Sensitive Data Masking
@@ -133,7 +128,12 @@ AtomPay_Microservice/
 
 ## ⚡ Key Architectural Patterns
 
-### 1. Transactional Outbox Pattern
+### 1. Shared Atomic Payment Finalizer (`packages/payment-finalizer`)
+To prevent code drift and double-crediting between push notifications (webhooks) and pull recovery (reconciliation), all terminal state transitions execute via a single shared helper:
+- **Idempotency & Concurrency**: Uses PostgreSQL row-level locks (`SELECT * FROM payments WHERE payment_id = $1 FOR UPDATE`). If the payment is already in a terminal state (`SUCCESS`/`FAILED`), it commits and exits safely.
+- **Atomic Operations**: Within a single PostgreSQL transaction (`BEGIN` ... `COMMIT`), it updates payment status, credits the user's wallet balance, inserts `wallet_transactions` log, writes double-entry ledger entries (`ACC_SYSTEM_CLEARING` $\rightarrow$ User Account), and emits domain events (`PAYMENT_SUCCEEDED` / `PAYMENT_FAILED`) to `outbox_events`.
+
+### 2. Transactional Outbox Pattern
 To prevent distributed transaction failures or process crashes between database writes and message queue publication, state updates and event logs are committed atomically within the same PostgreSQL transaction:
 
 ```sql
@@ -146,23 +146,23 @@ COMMIT;
 
 An asynchronous **Outbox Publisher** daemon polls `outbox_events` (`status = 'PENDING'`), publishes them to BullMQ queues, and marks them as `PUBLISHED`.
 
-### 2. Distributed Locking & Concurrent Transfer Protection
+### 3. Distributed Locking & Concurrent Transfer Protection
 - **Wallet Transfers**: Employs PostgreSQL row-level locks (`SELECT ... FOR UPDATE`) sorted deterministically by `user_id` to prevent deadlocks, double-spending, and race conditions.
 - **Payment Processing**: Uses Redis distributed locks (`payment:lock:{paymentId}`) with 30-second TTLs to ensure only one worker processes an attempt at a time.
 
-### 3. Double-Entry Accounting Ledger
+### 4. Double-Entry Accounting Ledger
 The Ledger Service enforces the fundamental accounting invariant across all transactions:
 
 $$\sum \text{DEBIT} = \sum \text{CREDIT}$$
 
 Ledger entries are strictly immutable. Corrections are performed exclusively through compensating entries.
 
-### 4. Opossum Circuit Breaker & UNKNOWN Payment State
-External provider calls are wrapped in Opossum circuit breakers (`CLOSED` -> `OPEN` -> `HALF_OPEN`).
-- If an external call times out or experiences a network failure, the payment state is marked as **`UNKNOWN`** — **NEVER `FAILED`**.
-- The **Reconciliation Worker** periodically polls the Provider Status API to safely resolve `UNKNOWN` payments to `SUCCESS` or `FAILED`.
+### 5. Asynchronous Signed Webhooks & Circuit-Breaker Reconciliation
+- **Initiation**: The Payment Worker calls `callExternalProvider(...)` protected by an Opossum circuit breaker. The mock provider returns a synchronous initiation response (`{ accepted: true, gatewayTxnId }`) and leaves the payment state as `PROCESSING`.
+- **Asynchronous Webhook**: After ~500ms, the mock provider computes an HMAC-SHA256 signature using `PAYMENT_WEBHOOK_SECRET` and fires an HTTP POST webhook to `Webhook Service`. The Webhook Service verifies the signature, deduplicates via Redis (`idem:payment-webhook:${paymentId}:${gatewayTxnId}`), and invokes `finalizePayment(...)`.
+- **Reconciliation Engine**: If a network timeout or circuit trip leaves a payment as `UNKNOWN` or stale `PROCESSING`, the **Reconciliation Worker** queries the **Provider Status API** (`getExternalPaymentStatus`) without any `Math.random()`. If the provider status is `SUCCESS` or `FAILED`, it calls `finalizePayment(...)` to safely settle the transaction. If `PROCESSING`, it leaves the payment unresolved for the next cycle.
 
-### 5. Idempotency Handling (Redis + PostgreSQL)
+### 6. Idempotency Handling (Redis + PostgreSQL)
 For payment and transfer requests containing an `Idempotency-Key` header:
 1. Fast atomic claim via Redis `SET NX` with 60s lock TTL.
 2. If already processed, the response is instantly replayed from Redis cache or PostgreSQL `idempotency_records`.
@@ -219,16 +219,21 @@ MAINTENANCE_MODE=false
 ```
 
 ### 2. Run with Docker Compose
-Start the complete containerized stack (Gateway, 7 Microservices, 3 Workers, PostgreSQL, MongoDB, Redis, AtomAI, Frontend):
+1.  **Clone the repository:**
+    ```bash
+    git clone <your_repo_url>
+    cd AtomPay_Microservice
+    ```
 
-```bash
-docker compose up --build -d
-```
-
-Check running services:
-```bash
-docker compose ps
-```
+2.  **Environment Variables:**
+    Copy the sample configuration:
+    ```bash
+    cp .env.example .env
+    ```
+3.  **Start all services:**
+    ```bash
+    docker-compose up --build
+    ```
 
 ---
 

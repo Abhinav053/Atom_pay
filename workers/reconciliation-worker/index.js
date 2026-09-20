@@ -1,7 +1,20 @@
 const { getPgPool, getRedis } = require("../../packages/database");
 const logger = require("../../packages/logger");
-const { EVENT_TYPES } = require("../../packages/shared-events");
-const crypto = require("crypto");
+const { createCircuitBreaker } = require("../../packages/circuit-breaker");
+const { finalizePayment } = require("../../packages/payment-finalizer");
+const { getExternalPaymentStatus } = require("../payment-worker");
+
+// Wrap provider status query with Circuit Breaker
+const statusBreaker = createCircuitBreaker(
+    async (paymentId) => {
+        return await getExternalPaymentStatus(paymentId);
+    },
+    {
+        timeout: 5000,
+        errorThresholdPercentage: 50,
+        resetTimeout: 10000
+    }
+);
 
 async function reconcileUnresolvedPayments() {
     const pool = getPgPool();
@@ -17,59 +30,43 @@ async function reconcileUnresolvedPayments() {
         );
 
         for (const payment of result.rows) {
-            logger.info("Reconciling payment", { paymentId: payment.payment_id, currentStatus: payment.status });
+            logger.info("Reconciling payment via Provider Status API", { paymentId: payment.payment_id, currentStatus: payment.status });
 
-            // Simulate Provider Status API call
-            const providerStatus = Math.random() < 0.8 ? "SUCCESS" : "FAILED";
-            const gatewayTxnId = payment.gateway_txn_id || `recon_${crypto.randomUUID()}`;
-
-            const client = await pool.connect();
+            let providerResult;
             try {
-                await client.query("BEGIN");
-                await client.query(
-                    `UPDATE payments 
-                     SET status = $1, gateway_txn_id = $2, updated_at = CURRENT_TIMESTAMP 
-                     WHERE payment_id = $3`,
-                    [providerStatus, gatewayTxnId, payment.payment_id]
-                );
-
-                if (providerStatus === "SUCCESS") {
-                    // Credit Wallet
-                    const walletRes = await client.query("SELECT id FROM wallets WHERE user_id = $1 FOR UPDATE", [payment.user_id]);
-                    if (walletRes.rows.length > 0) {
-                        const walletId = walletRes.rows[0].id;
-                        await client.query("UPDATE wallets SET balance = balance + $1 WHERE id = $2", [payment.amount, walletId]);
-                        await client.query(
-                            `INSERT INTO wallet_transactions 
-                             (transaction_id, type, to_wallet_id, amount, status, note, receiver_username, payment_id, gateway_txn_id)
-                             VALUES ($1, 'topup', $2, $3, 'success', 'Reconciliation topup', $4, $5)`,
-                            [crypto.randomUUID(), walletId, payment.amount, payment.payment_id, gatewayTxnId]
-                        );
-                    }
-
-                    // Create Outbox Event
-                    const eventPayload = {
-                        eventId: crypto.randomUUID(),
-                        eventType: EVENT_TYPES.PAYMENT_SUCCEEDED,
-                        aggregateType: "payment",
-                        aggregateId: payment.payment_id,
-                        payload: { paymentId: payment.payment_id, userId: payment.user_id, amount: parseFloat(payment.amount), gatewayTxnId }
-                    };
-                    await client.query(
-                        `INSERT INTO outbox_events (event_id, event_type, aggregate_type, aggregate_id, payload, status)
-                         VALUES ($1, $2, $3, $4, $5, 'PENDING')`,
-                        [eventPayload.eventId, eventPayload.eventType, eventPayload.aggregateType, eventPayload.aggregateId, JSON.stringify(eventPayload.payload)]
-                    );
-                }
-
-                await client.query("COMMIT");
-                await redis.del(`cache:balance:${payment.user_id}`, `cache:txns:${payment.user_id}`);
-                logger.info("Payment reconciled successfully", { paymentId: payment.payment_id, newStatus: providerStatus });
+                // Call Provider Status API protected by Circuit Breaker
+                providerResult = await statusBreaker.fire(payment.payment_id);
             } catch (err) {
-                await client.query("ROLLBACK");
-                logger.error("Reconciliation error for payment", { paymentId: payment.payment_id, error: err.message });
-            } finally {
-                client.release();
+                logger.error("Reconciliation provider status API call failed or timed out", { paymentId: payment.payment_id, error: err.message });
+                continue; // Leave unresolved for next reconciliation cycle
+            }
+
+            const { status: providerStatus, gatewayTxnId, failureReason } = providerResult;
+
+            // If provider is still PROCESSING, keep unresolved
+            if (providerStatus === "PROCESSING") {
+                logger.info("Payment still PROCESSING at provider, leaving unresolved", { paymentId: payment.payment_id });
+                continue;
+            }
+
+            // If provider returned terminal status (SUCCESS or FAILED), execute common finalization logic
+            if (providerStatus === "SUCCESS" || providerStatus === "FAILED") {
+                try {
+                    const finalRes = await finalizePayment({
+                        pool,
+                        redis,
+                        paymentId: payment.payment_id,
+                        status: providerStatus,
+                        gatewayTxnId: gatewayTxnId || payment.gateway_txn_id,
+                        failureReason: failureReason || null,
+                        provider: payment.provider || "MOCK_GATEWAY",
+                        source: "RECONCILIATION"
+                    });
+
+                    logger.info("Payment reconciled to terminal state", { paymentId: payment.payment_id, finalStatus: finalRes.status, duplicate: finalRes.duplicate });
+                } catch (err) {
+                    logger.error("Failed to reconcile payment finalization", { paymentId: payment.payment_id, error: err.message });
+                }
             }
         }
     } catch (err) {
