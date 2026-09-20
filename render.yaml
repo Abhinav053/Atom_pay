@@ -1,5 +1,5 @@
 # =========================================================
-# AtomPay Microservices Ecosystem — Render Blueprint Spec
+# AtomPay Microservices Ecosystem — Render Blueprint
 # =========================================================
 
 databases:
@@ -10,287 +10,339 @@ databases:
   - name: atompay-redis
     plan: free
 
+
 services:
-  # ---------------------------------------------------------
+
+  # =========================================================
   # 1. API GATEWAY
-  # ---------------------------------------------------------
+  # =========================================================
   - type: web
     name: atompay-api-gateway
     env: docker
     dockerfilePath: api-gateway/Dockerfile
     plan: free
     healthCheckPath: /api
+
     envVars:
       - key: PORT
-        value: 3000
+        value: "3000"
+
       - key: DATABASE_URL
         fromDatabase:
           name: atompay-db
           property: connectionString
+
       - key: REDIS_URL
         fromRedis:
           name: atompay-redis
           property: connectionString
+
       - key: MONGO_URL
-        value: ""
         sync: false
+
       - key: JWT_SECRET
         generateValue: true
+
       - key: AUTH_SERVICE_URL
         fromService:
           type: web
           name: atompay-auth-service
           property: host
+
       - key: WALLET_SERVICE_URL
         fromService:
           type: web
           name: atompay-wallet-service
           property: host
+
       - key: PAYMENT_SERVICE_URL
         fromService:
           type: web
           name: atompay-payment-service
           property: host
+
       - key: REFUND_SERVICE_URL
         fromService:
           type: web
           name: atompay-refund-service
           property: host
+
       - key: WEBHOOK_SERVICE_URL
         fromService:
           type: web
           name: atompay-webhook-service
           property: host
+
       - key: LEDGER_SERVICE_URL
         fromService:
           type: web
           name: atompay-ledger-service
           property: host
+
       - key: NOTIFICATION_SERVICE_URL
         fromService:
           type: web
           name: atompay-notification-service
           property: host
 
-  # ---------------------------------------------------------
+
+  # =========================================================
   # 2. AUTH SERVICE
-  # ---------------------------------------------------------
+  # =========================================================
   - type: web
     name: atompay-auth-service
     env: docker
     dockerfilePath: services/auth-service/Dockerfile
     plan: free
+
     envVars:
       - key: PORT
-        value: 3001
+        value: "3001"
+
       - key: DATABASE_URL
         fromDatabase:
           name: atompay-db
           property: connectionString
+
       - key: REDIS_URL
         fromRedis:
           name: atompay-redis
           property: connectionString
+
       - key: JWT_SECRET
         fromService:
           type: web
           name: atompay-api-gateway
           envVarKey: JWT_SECRET
+
       - key: BREVO_API_KEY
-        value: ""
-        sync: false
-      - key: SENDER_EMAIL
-        value: ""
         sync: false
 
-  # ---------------------------------------------------------
+      - key: SENDER_EMAIL
+        sync: false
+
+
+  # =========================================================
   # 3. WALLET SERVICE
-  # ---------------------------------------------------------
+  # =========================================================
   - type: web
     name: atompay-wallet-service
     env: docker
     dockerfilePath: services/wallet-service/Dockerfile
     plan: free
+
     envVars:
       - key: PORT
-        value: 3002
+        value: "3002"
+
       - key: DATABASE_URL
         fromDatabase:
           name: atompay-db
           property: connectionString
+
       - key: REDIS_URL
         fromRedis:
           name: atompay-redis
           property: connectionString
 
-  # ---------------------------------------------------------
+
+  # =========================================================
   # 4. PAYMENT SERVICE
-  # ---------------------------------------------------------
+  # =========================================================
   - type: web
     name: atompay-payment-service
     env: docker
     dockerfilePath: services/payment-service/Dockerfile
     plan: free
+
     envVars:
       - key: PORT
-        value: 3003
+        value: "3003"
+
       - key: DATABASE_URL
         fromDatabase:
           name: atompay-db
           property: connectionString
+
       - key: REDIS_URL
         fromRedis:
           name: atompay-redis
           property: connectionString
 
-  # ---------------------------------------------------------
+
+  # =========================================================
   # 5. REFUND SERVICE
-  # ---------------------------------------------------------
+  # =========================================================
   - type: web
     name: atompay-refund-service
     env: docker
     dockerfilePath: services/refund-service/Dockerfile
     plan: free
+
     envVars:
       - key: PORT
-        value: 3004
+        value: "3004"
+
       - key: DATABASE_URL
         fromDatabase:
           name: atompay-db
           property: connectionString
+
       - key: REDIS_URL
         fromRedis:
           name: atompay-redis
           property: connectionString
 
-  # ---------------------------------------------------------
+
+  # =========================================================
   # 6. WEBHOOK SERVICE
-  # ---------------------------------------------------------
+  # =========================================================
   - type: web
     name: atompay-webhook-service
     env: docker
     dockerfilePath: services/webhook-service/Dockerfile
     plan: free
+
     envVars:
       - key: PORT
-        value: 3005
+        value: "3005"
+
       - key: DATABASE_URL
         fromDatabase:
           name: atompay-db
           property: connectionString
+
       - key: REDIS_URL
         fromRedis:
           name: atompay-redis
           property: connectionString
+
       - key: MONGO_URL
-        value: ""
         sync: false
 
-  # ---------------------------------------------------------
+
+  # =========================================================
   # 7. LEDGER SERVICE
-  # ---------------------------------------------------------
+  # =========================================================
   - type: web
     name: atompay-ledger-service
     env: docker
     dockerfilePath: services/ledger-service/Dockerfile
     plan: free
+
     envVars:
       - key: PORT
-        value: 3006
+        value: "3006"
+
       - key: DATABASE_URL
         fromDatabase:
           name: atompay-db
           property: connectionString
 
-  # ---------------------------------------------------------
+
+  # =========================================================
   # 8. NOTIFICATION SERVICE
-  # ---------------------------------------------------------
+  # =========================================================
   - type: web
     name: atompay-notification-service
     env: docker
     dockerfilePath: services/notification-service/Dockerfile
     plan: free
+
     envVars:
       - key: PORT
-        value: 3007
+        value: "3007"
+
       - key: REDIS_URL
         fromRedis:
           name: atompay-redis
           property: connectionString
+
       - key: MONGO_URL
-        value: ""
         sync: false
 
-  # ---------------------------------------------------------
+
+  # =========================================================
   # 9. PAYMENT WORKER
-  # ---------------------------------------------------------
+  # =========================================================
   - type: worker
     name: atompay-payment-worker
     env: docker
     dockerfilePath: workers/payment-worker/Dockerfile
     plan: free
+
     envVars:
       - key: DATABASE_URL
         fromDatabase:
           name: atompay-db
           property: connectionString
+
       - key: REDIS_URL
         fromRedis:
           name: atompay-redis
           property: connectionString
+
       - key: MONGO_URL
-        value: ""
         sync: false
+
       - key: PAYMENT_WEBHOOK_URL
         fromService:
           type: web
           name: atompay-webhook-service
           property: host
 
-  # ---------------------------------------------------------
+
+  # =========================================================
   # 10. OUTBOX PUBLISHER WORKER
-  # ---------------------------------------------------------
+  # =========================================================
   - type: worker
     name: atompay-outbox-publisher
     env: docker
     dockerfilePath: workers/outbox-publisher.Dockerfile
     plan: free
+
     envVars:
       - key: DATABASE_URL
         fromDatabase:
           name: atompay-db
           property: connectionString
+
       - key: REDIS_URL
         fromRedis:
           name: atompay-redis
           property: connectionString
 
-  # ---------------------------------------------------------
+
+  # =========================================================
   # 11. RECONCILIATION WORKER
-  # ---------------------------------------------------------
+  # =========================================================
   - type: worker
     name: atompay-reconciliation-worker
     env: docker
     dockerfilePath: workers/reconciliation-worker/Dockerfile
     plan: free
+
     envVars:
       - key: DATABASE_URL
         fromDatabase:
           name: atompay-db
           property: connectionString
+
       - key: REDIS_URL
         fromRedis:
           name: atompay-redis
           property: connectionString
 
-  # ---------------------------------------------------------
-  # 12. FRONTEND WEB APP
-  # ---------------------------------------------------------
+
+  # =========================================================
+  # 12. FRONTEND
+  # =========================================================
   - type: web
     name: atompay-frontend
     env: static
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: frontend/dist
+
     routes:
       - type: rewrite
         source: /*
