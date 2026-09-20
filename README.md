@@ -179,27 +179,24 @@ $env:NODE_PATH="backend/node_modules"; node tests/scenarios.test.js
 ```
 
 ### Verified Scenarios:
-1. Same payment request sent twice returns cached response.
-2. Same idempotency key sent concurrently handles lock contention cleanly.
-3. Two workers processing the same payment are synchronized by Redis distributed locks.
-4. Worker crash leaves lock to expire safely.
-5. Provider timeout sets status to `UNKNOWN`, NOT `FAILED`.
-6. Lost HTTP responses are recovered by status lookup / webhooks.
-7. Provider duplicate webhooks are deduplicated via event IDs.
-8. Invalid HMAC webhook signatures are rejected (401).
-9. Missing webhooks are caught and resolved by the Reconciliation worker.
-10. Rate limiter fails open gracefully if Redis is temporarily offline.
-11. PostgreSQL transaction rolls back balance changes on insufficient funds.
-12. Outbox publisher safely retries pending events upon recovery.
-13. Queue backoff strategy retries failed job enqueueing.
-14. Payment provider errors trip the circuit breaker.
-15. Circuit breaker `OPEN` state rejects external calls fast without hanging.
-16. Payment status remains `UNKNOWN` if provider is still unreachable.
-17. Reconciliation resolves `UNKNOWN` -> `SUCCESS` after provider query.
-18. Jobs exceeding maximum retries enter the Dead Letter Queue (DLQ).
-19. Double-entry ledger invariant verifies `SUM(DEBIT) == SUM(CREDIT)`.
-20. Notification service failure does not roll back successful financial transactions.
-21. Logger automatically redacts passwords, PINs, and secret keys.
+Same payment request sent twice returns cached response.
+Same idempotency key sent concurrently handles lock contention cleanly.
+Two workers processing the same payment are synchronized by Redis distributed locks.
+Worker crash leaves lock to expire safely.
+Provider timeout sets status to UNKNOWN, not FAILED.
+Lost HTTP responses are recovered by status lookup / webhooks.
+Provider duplicate webhooks are deduplicated via event IDs.
+Invalid HMAC webhook signatures are rejected (401).
+Missing webhooks are caught and resolved by the Reconciliation Worker.
+Rate limiter fails open gracefully if Redis is temporarily offline.
+PostgreSQL transaction rolls back balance changes on insufficient funds.
+Outbox Publisher safely retries pending events upon recovery.
+Payment provider errors trip the Circuit Breaker.
+Circuit Breaker OPEN state rejects external calls fast without hanging.
+Payment status remains UNKNOWN if the provider is still unreachable.
+Reconciliation resolves UNKNOWN → SUCCESS after provider query.
+Double-entry ledger invariant verifies SUM(DEBIT) == SUM(CREDIT).
+
 
 ---
 
