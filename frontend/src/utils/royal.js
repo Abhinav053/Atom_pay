@@ -18,7 +18,7 @@ export const ROYAL_BLESSINGS = [
   "Fortune favours the well-counted.",
 ];
 
-export const HOST = "Akshay Dhankhar";
+export const HOST = "Abhinav Singh";
 
 /** First name only — feels personal, never a clunky full name or handle. */
 export function firstNameOf(name) {

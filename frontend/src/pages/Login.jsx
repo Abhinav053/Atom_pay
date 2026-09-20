@@ -36,6 +36,7 @@ export default function Login({ onLogin, goToSignup }) {
         body: JSON.stringify({ email: form.email, password: form.password }),
       });
       setStep(2);
+      setForm(f => ({ ...f, otp: "" }));
       startCooldown();
     } catch (err) {
       setError(err.message);
@@ -83,7 +84,7 @@ export default function Login({ onLogin, goToSignup }) {
         method: "POST",
         body: JSON.stringify({ email: form.email }),
       });
-      setReset(r => ({ ...r, otpSent: true }));
+      setReset(r => ({ ...r, otpSent: true, otp: "" }));
       setInfo(data.msg || "If an account exists, a reset code has been sent.");
       startCooldown();
     } catch (err) {
@@ -142,7 +143,7 @@ export default function Login({ onLogin, goToSignup }) {
         </div>
 
         {/* <div className="auth-host">
-          <span /><em>Your host, <strong>Akshay Dhankhar</strong></em><span />
+          <span /><em>Your host, <strong>Abhinav Singh</strong></em><span />
         </div> */}
 
         <p className="auth-subtitle">
@@ -198,6 +199,7 @@ export default function Login({ onLogin, goToSignup }) {
                       maxLength={6}
                       value={reset.otp}
                       onChange={e => setReset({ ...reset, otp: e.target.value.replace(/\D/g, "") })}
+                      autoComplete="off"
                     />
                   </div>
                   <div className="input-group">
@@ -208,6 +210,7 @@ export default function Login({ onLogin, goToSignup }) {
                       value={reset.newPassword}
                       onChange={e => setReset({ ...reset, newPassword: e.target.value })}
                       onKeyDown={e => e.key === "Enter" && handleResetPassword()}
+                      autoComplete="off"
                     />
                   </div>
 
@@ -279,6 +282,7 @@ export default function Login({ onLogin, goToSignup }) {
                       value={form.otp}
                       onChange={e => setForm({ ...form, otp: e.target.value.replace(/\D/g, "") })}
                       onKeyDown={e => e.key === "Enter" && handleVerifyOTP()}
+                      autoComplete="off"
                     />
                   </div>
 

@@ -52,7 +52,7 @@ export default function SideNav({ active, navigate, user, onLogout }) {
           <span className="sidenav-link-icon">🚪</span>
           <span className="sidenav-link-label">Logout</span>
         </button>
-        <div className="sidenav-credit">Crafted by <strong>Akshay Dhankhar</strong></div>
+        <div className="sidenav-credit">Crafted by <strong>Abhinav Singh</strong></div>
       </div>
     </aside>
   );

@@ -54,6 +54,8 @@ services:
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/atompay
       REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET:-dev-secret-key-atompay}
+      BREVO_API_KEY: ${BREVO_API_KEY:-}
+      SENDER_EMAIL: ${SENDER_EMAIL:-}
     depends_on:
       postgres:
         condition: service_healthy
@@ -121,7 +123,7 @@ services:
     environment:
       PORT: 3005
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/atompay
-      MONGO_URL: mongodb://mongo:27017/atompay?replicaSet=rs0
+      MONGO_URL: ${MONGO_URL:-mongodb://mongo:27017/atompay}
       REDIS_URL: redis://redis:6379
       PAYMENT_WEBHOOK_SECRET: ${PAYMENT_WEBHOOK_SECRET:-dev-payment-webhook-secret}
     depends_on:
@@ -155,7 +157,7 @@ services:
       - "3007:3007"
     environment:
       PORT: 3007
-      MONGO_URL: mongodb://mongo:27017/atompay?replicaSet=rs0
+      MONGO_URL: ${MONGO_URL:-mongodb://mongo:27017/atompay}
       REDIS_URL: redis://redis:6379
     depends_on:
       mongo:
@@ -172,7 +174,7 @@ services:
     environment:
       - DATABASE_URL=postgres://postgres:postgres@postgres:5432/atompay
       - REDIS_URL=redis://redis:6379
-      - MONGO_URL=mongodb://mongodb:27017/atompay
+      - MONGO_URL=${MONGO_URL:-mongodb://mongo:27017/atompay}
       - PAYMENT_WEBHOOK_URL=http://webhook-service:3005/payment
       - PAYMENT_WEBHOOK_SECRET=${PAYMENT_WEBHOOK_SECRET:-dev-payment-webhook-secret}
       - LOG_LEVEL=debug

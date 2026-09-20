@@ -8,15 +8,15 @@ import "../styles/welcome.css";
  * opens.
  *
  * It is deliberately personal: every guest is greeted by name, and by their
- * host, Akshay Dhankhar — a coronation for first-time sovereigns, a royal
+ * host, Abhinav Singh — a coronation for first-time sovereigns, a royal
  * homecoming for returning ones.
  *
  * @param {string}   name       the guest's name (or username)
  * @param {boolean}  isNewUser  true on first-ever signup → coronation
  * @param {function} onEnter    called when the guest enters the kingdom
- * @param {string}   host       the host's name (default: Akshay Dhankhar)
+ * @param {string}   host       the host's name (default: Abhinav Singh)
  */
-const HOST = "Akshay Dhankhar";
+const HOST = "Abhinav Singh";
 
 export default function RoyalWelcome({ name, isNewUser, onEnter, host = HOST }) {
   const btnRef = useRef(null);

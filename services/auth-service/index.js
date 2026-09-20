@@ -32,12 +32,48 @@ async function generateTokenPair(userId) {
     return { accessToken, refreshToken };
 }
 
+// Helper: Send OTP Email via Brevo REST API / SMTP
+async function sendOtpEmail(email, otp) {
+    const apiKey = process.env.BREVO_API_KEY;
+    if (apiKey) {
+        try {
+            const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+                method: "POST",
+                headers: {
+                    "api-key": apiKey,
+                    "content-type": "application/json",
+                    "accept": "application/json"
+                },
+                body: JSON.stringify({
+                    sender: { name: "AtomPay Security", email: process.env.SENDER_EMAIL || "no-reply@atompay.com" },
+                    to: [{ email }],
+                    subject: "AtomPay Verification Code",
+                    htmlContent: `
+                        <div style="font-family: Arial, sans-serif; padding: 24px; background: #0f172a; color: #ffffff; border-radius: 8px;">
+                            <h2 style="color: #fbbf24; margin-top: 0;">AtomPay Digital Wallet</h2>
+                            <p style="font-size: 16px; color: #e2e8f0;">Your verification code is:</p>
+                            <div style="font-size: 36px; font-weight: bold; letter-spacing: 6px; color: #10b981; margin: 24px 0; padding: 12px; background: #1e293b; display: inline-block; border-radius: 6px;">${otp}</div>
+                            <p style="color: #94a3b8; font-size: 14px;">This OTP code is valid for 10 minutes. Please do not share it with anyone.</p>
+                        </div>
+                    `
+                })
+            });
+            const data = await response.json().catch(() => ({}));
+            logger.info("Brevo OTP email delivery attempt", { email, response: data });
+        } catch (err) {
+            logger.error("Failed to deliver Brevo OTP email", { error: err.message });
+        }
+    }
+}
+
 // Helper: OTP Generation & Verification
 async function generateAndStoreOTP(email) {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const redis = getRedis();
     // Store in Redis for 10 minutes
     await redis.set(`otp:${email}`, otp, "EX", 600);
+    // Dispatch OTP email asynchronously
+    sendOtpEmail(email, otp).catch(err => logger.error("Async email error", { error: err.message }));
     return otp;
 }
 
@@ -164,9 +200,8 @@ app.post("/send-signup-otp", async (req, res) => {
         if (existing.rows.length > 0) {
             return res.status(400).json({ msg: "Email already exists" });
         }
-        const otp = await generateAndStoreOTP(email);
-        logger.info("Generated signup OTP", { email, otp });
-        return res.status(200).json({ msg: "OTP sent to your email for signup", debugOtp: otp });
+        await generateAndStoreOTP(email);
+        return res.status(200).json({ msg: "OTP sent to your email for signup" });
     } catch (err) {
         logger.error("Send signup OTP error", { error: err.message });
         return res.status(500).json({ msg: "Failed to send OTP. Please try again." });
@@ -184,8 +219,8 @@ app.post("/send-otp", async (req, res) => {
         const isMatch = await bcrypt.compare(password, result.rows[0].password);
         if (!isMatch) return res.status(401).json({ msg: "Wrong password" });
 
-        const otp = await generateAndStoreOTP(email);
-        return res.status(200).json({ msg: "OTP sent to your email", debugOtp: otp });
+        await generateAndStoreOTP(email);
+        return res.status(200).json({ msg: "OTP sent to your email" });
     } catch (err) {
         logger.error("Send OTP error", { error: err.message });
         return res.status(500).json({ msg: "Failed to send OTP. Please try again." });

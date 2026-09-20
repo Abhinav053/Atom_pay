@@ -17,7 +17,7 @@ export default function Maintenance() {
 
         <h1 className="maintenance-title">Under Maintenance</h1>
         <p className="maintenance-desc">
-          Akshay Dhankhar is upgrading AtomPay to serve you better.<br />
+          Abhinav Singh is upgrading AtomPay to serve you better.<br />
           This won't take long — hang tight!
         </p>
 

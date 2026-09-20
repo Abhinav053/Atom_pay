@@ -27,6 +27,7 @@ export default function Signup({ onLogin, goToLogin }) {
         body: JSON.stringify({ email: form.email }),
       });
       setOtpSent(true);
+      setForm(f => ({ ...f, otp: "" }));
     } catch (err) {
       setError(err.message || "Failed to send OTP");
     } finally {
@@ -80,7 +81,7 @@ export default function Signup({ onLogin, goToLogin }) {
           <div className="auth-wordmark">Atom<span>Pay</span></div>
         </div>
         <div className="auth-host">
-          <span /><em>Your host, <strong>Akshay Dhankhar</strong></em><span />
+          <span /><em>Your host, <strong>Abhinav Singh</strong></em><span />
         </div>
         <p className="auth-subtitle">Claim your throne — and a ₹500,000 royal treasury to begin</p>
 
@@ -88,9 +89,9 @@ export default function Signup({ onLogin, goToLogin }) {
           {!otpSent ? (
             <>
               {[
-                { key: "name", label: "Full Name", placeholder: "Akshay Dhankhar", type: "text" },
-                { key: "email", label: "Email", placeholder: "akshay@example.com", type: "email" },
-                { key: "username", label: "Username", placeholder: "akshay123", type: "text" },
+                { key: "name", label: "Full Name", placeholder: "Abhinav Singh", type: "text" },
+                { key: "email", label: "Email", placeholder: "abhinav@example.com", type: "email" },
+                { key: "username", label: "Username", placeholder: "abhinav123", type: "text" },
                 { key: "password", label: "Password", placeholder: "Min 8 characters", type: "password" },
                 { key: "pin", label: "UPI PIN (6 digits)", placeholder: "••••••", type: "password" },
               ].map(({ key, label, placeholder, type }) => (
@@ -122,6 +123,7 @@ export default function Signup({ onLogin, goToLogin }) {
                   value={form.otp}
                   onChange={f("otp")}
                   maxLength={6}
+                  autoComplete="off"
                 />
               </div>
 
@@ -139,7 +141,7 @@ export default function Signup({ onLogin, goToLogin }) {
           </p>
 
           <p className="auth-seal">
-            Crafted in gold by <strong>Akshay Dhankhar</strong>
+            Crafted in gold by <strong>Abhinav Singh</strong>
           </p>
         </div>
       </div>
