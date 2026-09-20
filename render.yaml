@@ -5,7 +5,6 @@
 databases:
   - name: atompay-db
     databaseName: atompay
-    user: postgres
     plan: free
 
   - name: atompay-redis
@@ -33,6 +32,7 @@ services:
           name: atompay-redis
           property: connectionString
       - key: MONGO_URL
+        value: ""
         sync: false
       - key: JWT_SECRET
         generateValue: true
@@ -97,8 +97,10 @@ services:
           name: atompay-api-gateway
           envVarKey: JWT_SECRET
       - key: BREVO_API_KEY
+        value: ""
         sync: false
       - key: SENDER_EMAIL
+        value: ""
         sync: false
 
   # ---------------------------------------------------------
@@ -181,6 +183,7 @@ services:
           name: atompay-redis
           property: connectionString
       - key: MONGO_URL
+        value: ""
         sync: false
 
   # ---------------------------------------------------------
@@ -215,6 +218,7 @@ services:
           name: atompay-redis
           property: connectionString
       - key: MONGO_URL
+        value: ""
         sync: false
 
   # ---------------------------------------------------------
@@ -235,6 +239,7 @@ services:
           name: atompay-redis
           property: connectionString
       - key: MONGO_URL
+        value: ""
         sync: false
       - key: PAYMENT_WEBHOOK_URL
         fromService:
